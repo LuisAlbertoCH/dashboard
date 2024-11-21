@@ -217,7 +217,7 @@ body {
   padding: 20px;
   display: grid;
   grid-template-columns: repeat(4, 1fr);
-  
+  grid-gap: 30px;
 }
 
 .cardBox .card {
@@ -229,7 +229,6 @@ body {
   justify-content: space-between;
   cursor: pointer;
   box-shadow: 0 7px 25px rgba(0, 0, 0, 0.08);
-  gap: 15px;
 }
 
 .cardBox .card .numbers {
@@ -468,3 +467,47 @@ body {
     left: initial;
   }
 }
+
+.modal-content {
+  padding: 20px;
+  background-color: #ffffff;
+  border-radius: 8px;
+  max-width: 500px;
+  margin: auto;
+}
+
+.talent-form, .project-form {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.talent-form label, .project-form label {
+  font-weight: bold;
+  color: #333;
+}
+
+.talent-form input, .project-form input, .talent-form select, .project-form select {
+  padding: 8px;
+  border-radius: 4px;
+  border: 1px solid #ccc;
+  font-size: 16px;
+}
+
+button {
+  padding: 10px;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+button[type="submit"] {
+  background-color: #4CAF50;
+  color: white;
+}
+
+button[type="button"] {
+  background-color: #f44336;
+  color: white;
+}
+

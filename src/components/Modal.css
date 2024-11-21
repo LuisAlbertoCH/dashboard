@@ -1,0 +1,52 @@
+.modal-overlay {
+  position: fixed;
+  top: 25%; /* Baja el modal un poco más */
+  left: 50%;
+  transform: translate(-50%, 0); /* Centrado horizontal */
+  z-index: 1000;
+  background: white;
+  padding: 20px;
+  border: 1px solid black;
+  border-radius: 10px;
+  box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2);
+  width: 55%;
+  height: auto; /* Ajuste automático de altura */
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+}
+
+.modal-content {
+  background: white;
+  padding: 20px;
+  border-radius: 8px;
+  max-width: 775px;
+  width: 100%;
+  height: auto;
+  position: relative; /* Cambiado a relative */
+  display: flex;
+  flex-direction: column;
+  gap: 15px; /* Espacio entre elementos */
+}
+
+.modal-content form {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 15px;
+}
+
+.modal-content label,
+.modal-content input {
+  flex: 1 1 45%; /* Ajusta el ancho de los elementos */
+  margin-bottom: 10px;
+}
+
+.modal-close {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  background: transparent;
+  border: none;
+  font-size: 1.5rem;
+  cursor: pointer;
+}
