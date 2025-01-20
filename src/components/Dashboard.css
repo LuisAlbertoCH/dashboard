@@ -1,6 +1,6 @@
 .dashboard .cardBox {
     display: flex;
-    gap: 20px;
+    gap: 150px;
     margin-bottom: 20px;
   }
   
@@ -52,6 +52,8 @@
     border-radius: 8px;
     overflow: hidden;
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    background-color: #f8f9fa;
+    border: 2px solid #ddd;
   }
   
   .projectsTable th,
@@ -108,7 +110,7 @@
   .talentosNotas {
     display: flex;
     justify-content: space-around;
-    margin-top: 20px;
+    margin-top: 50px;
   }
   
   .talentosList,
@@ -132,5 +134,20 @@
     height: 150px;
     padding: 10px;
     font-size: 16px;
+  }
+  
+  .noteButton {
+    margin-top: 20px;
+    padding: 10px 15px;
+    background-color: #007bff;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 14px;
+  }
+  
+  .noteButton:hover {
+    background-color: #0056b3;
   }
   

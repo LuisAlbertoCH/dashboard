@@ -1,10 +1,10 @@
-const API_URL = 'https://api.smartsheet.com/2.0';
-const TOKEN = `Bearer ${process.env.REACT_APP_SMARTSHEET_TOKEN}`; // Asegúrate de configurar el token en el archivo .env
+const API_URL = 'http://localhost:5000/smartsheet';
+const TOKEN = `Bearer ${process.env.REACT_APP_SMARTSHEET_TOKEN}`;
 
 // Función para obtener datos de una hoja específica
 export const getSheetData = async (sheetId) => {
   try {
-    const response = await fetch(`${API_URL}/sheets/${sheetId}`, {
+    const response = await fetch(`${API_URL}/${sheetId}`, {
       method: 'GET',
       headers: {
         'Authorization': TOKEN,
@@ -68,6 +68,24 @@ export const deleteRowFromSheet = async (sheetId, rowId) => {
       }
     });
     if (!response.ok) throw new Error('Error al eliminar fila en Smartsheet');
+    return await response.json();
+  } catch (error) {
+    console.error(error);
+    throw error;
+  }
+};
+
+// Obtener hojas dentro de un espacio de trabajo
+export const getWorkspaceSheets = async (workspaceId) => {
+  try {
+    const response = await fetch(`${API_URL}/workspace/${workspaceId}`, {
+      method: 'GET',
+      headers: {
+        Authorization: TOKEN,
+        'Content-Type': 'application/json',
+      },
+    });
+    if (!response.ok) throw new Error('Error al obtener hojas del espacio de trabajo');
     return await response.json();
   } catch (error) {
     console.error(error);

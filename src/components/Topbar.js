@@ -1,6 +1,7 @@
 import React from 'react';
+import './Topbar.css';
 
-const Topbar = () => {
+const Topbar = ({ onToggleTheme, isDarkMode }) => {
   return (
     <div className="topbar">
       <div className="toggle">
@@ -12,6 +13,9 @@ const Topbar = () => {
           <ion-icon name="search-outline"></ion-icon>
         </label>
       </div>
+      <button className="themeToggleButton" onClick={onToggleTheme}>
+        <ion-icon name={isDarkMode ? 'sunny-outline' : 'moon-outline'}></ion-icon>
+      </button>
       <div className="user">
         <img src="assets/imgs/customer01.jpg" alt="Usuario" />
       </div>

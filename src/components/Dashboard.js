@@ -3,30 +3,30 @@ import {
   obtenerProyectos as getProjects, 
   obtenerTalentos as getTalents, 
   agregarVisita as addVisit, 
-  obtenerVisitas as getVisits, 
-  obtenerNotasTalento as getTalentNotes,
-  saveTalentNotes 
+  obtenerVisitas as getVisits
 } from '../services/api';
-
+//import { generarReporteXML } from '../services/api';
 import SmartsheetData from '../components/SmartsheetData';
 import { Line } from 'react-chartjs-2';
 import { Chart, registerables } from 'chart.js'; // Importar Chart.js y registrar componentes
 import './Dashboard.css';
+import Topbar from './Topbar';
 
 Chart.register(...registerables); // Registro necesario para Chart.js
 
-const Dashboard = () => {
+const Dashboard = ({ onToggleTheme }) => {
   const [proyectos, setProyectos] = useState([]);
   const [talentos, setTalentos] = useState([]);
   const [visitas, setVisitas] = useState(0);
   const [ingresos, setIngresos] = useState(0);
   const [egresos, setEgresos] = useState(0);
   const [ganancias, setGanancias] = useState(0);
-  const [selectedTalent, setSelectedTalent] = useState(null);
-  const [talentNotes, setTalentNotes] = useState('');
   const [chartData, setChartData] = useState({ labels: [], datasets: [] });
   const [error, setError] = useState(null); // Estado para manejar errores
-  const sheetId = 'YOUR_SHEET_ID';
+  const sheetId = 'XhHJQ9MpjfwFvg4g3whjx78GvQpCvccV6p23Ph81';
+  const workspaceId = '5911013938751364'
+  const [modalOpen, setModalOpen] = useState(false); // Estado del modal
+  const [modalUrl, setModalUrl] = useState(''); // URL para el iframe del modal
 
   useEffect(() => {
     const cargarDatos = async () => {
@@ -83,23 +83,59 @@ const Dashboard = () => {
   };
 
   const generarDatosGrafica = () => {
-    const agrupados = agruparGanancias(proyectos);
-    const labels = Object.keys(agrupados);
-    const datos = Object.values(agrupados);
-
+    const meses = [
+      'Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 
+      'Junio', 'Julio', 'Agosto', 'Septiembre', 'Octubre', 
+      'Noviembre', 'Diciembre'
+    ];
+    
+    const ingresosPorMes = new Array(12).fill(0);
+    const gastosPorMes = new Array(12).fill(0);
+  
+    proyectos.forEach((proyecto) => {
+      if (proyecto.Ingreso) {
+        const fecha = new Date(proyecto.FechaInicio); // Fecha de inicio del proyecto
+        const mes = fecha.getMonth();
+        ingresosPorMes[mes] += parseFloat(proyecto.Ingreso) || 0; // Sumar ingreso del proyecto
+      }
+    });
+  
+    talentos.forEach((talento) => {
+      const salarioMensual = parseFloat(talento.Salario) || 0;
+      for (let i = 0; i < 12; i++) {
+        gastosPorMes[i] += salarioMensual; // Sumar salarios a los gastos por mes
+      }
+    });
+  
+    proyectos.forEach((proyecto) => {
+      if (proyecto.Pago) {
+        const fecha = new Date(proyecto.FechaFin); // Fecha de fin para sumar pagos
+        const mes = fecha.getMonth();
+        gastosPorMes[mes] += parseFloat(proyecto.Presupuesto) || 0; // Sumar pagos a los gastos
+      }
+    });
+  
     setChartData({
-      labels: labels,
+      labels: meses, // Etiquetas del eje X
       datasets: [
         {
-          label: 'Ganancias ($)',
-          data: datos,
+          label: 'Proyección de Ingresos ($)',
+          data: ingresosPorMes,
           borderColor: 'rgba(75, 192, 192, 1)',
           backgroundColor: 'rgba(75, 192, 192, 0.2)',
+          fill: true,
+        },
+        {
+          label: 'Proyección de Gastos ($)',
+          data: gastosPorMes,
+          borderColor: 'rgba(255, 99, 132, 1)',
+          backgroundColor: 'rgba(255, 99, 132, 0.2)',
           fill: true,
         },
       ],
     });
   };
+  
 
   const agruparGanancias = (proyectos) => {
     const gananciasPorMes = {};
@@ -113,149 +149,120 @@ const Dashboard = () => {
     return gananciasPorMes;
   };
 
-  const handleSelectTalent = async (talento) => {
-    setSelectedTalent(talento);
-    try {
-      const notes = await getTalentNotes(talento._id); // Obtener las notas de un talento específico
-      setTalentNotes(notes || '');
-    } catch (error) {
-      setError("Error al obtener notas del talento");
-      setTalentNotes('');
-    }
-  };
-
-  const handleNotesChange = (e) => {
-    setTalentNotes(e.target.value);
-  };
-
-  const handleSaveNotes = async () => {
-    if (selectedTalent) {
-      try {
-        await saveTalentNotes(selectedTalent._id, talentNotes);
-        alert('Nota guardada correctamente');
-      } catch (error) {
-        setError('Error al guardar la nota');
-      }
+  const formatNumber = (number) => {
+    if (number >= 1_000_000_000) {
+      return `$${(number / 1_000_000_000).toFixed(2)}B`; // Billones
+    } else if (number >= 1_000_000) {
+      return `$${(number / 1_000_000).toFixed(2)}M`; // Millones
+    } else if (number >= 1_000) {
+      return `$${(number / 1_000).toFixed(2)}K`; // Miles
     } else {
-      setError('Selecciona un talento antes de guardar una nota');
+      return `$${number.toFixed(2)}`; // Menos de mil
     }
-  };  
+  };
+  
 
-  return (
-    <div className="dashboard">
-      {/* Cards */}
-      <div className="cardBox">
-        <div className="card">
-          <div>
-            <div className="numbers">{visitas}</div>
-            <div className="cardName">Visitas</div>
-          </div>
-          <div className="iconBx">
-            <ion-icon name="eye-outline"></ion-icon>
-          </div>
-        </div>
-        <div className="card">
-          <div>
-            <div className="numbers">${ingresos.toFixed(2)}</div>
-            <div className="cardName">Ingresos</div>
-          </div>
-          <div className="iconBx">
-            <ion-icon name="log-in-outline"></ion-icon>
-          </div>
-        </div>
-        <div className="card">
-          <div>
-            <div className="numbers">${egresos.toFixed(2)}</div>
-            <div className="cardName">Egresos</div>
-          </div>
-          <div className="iconBx">
-            <ion-icon name="log-out-outline"></ion-icon>
-          </div>
-        </div>
-        <div className="card">
-          <div>
-            <div className="numbers">${ganancias.toFixed(2)}</div>
-            <div className="cardName">Ganancias</div>
-          </div>
-          <div className="iconBx">
-            <ion-icon name="cash-outline"></ion-icon>
-          </div>
-        </div>
-      </div>
-
-      {/* Tabla de Proyectos */}
+    return (
       <div className="dashboard">
-        <h2>Proyectos</h2>
-        <table className="projectsTable">
-          <thead>
-            <tr>
-              <th>Nombre del Proyecto</th>
-              <th>Talentos</th>
-              <th>Presupuesto</th>
-              <th>Estado</th>
-              <th>Pago</th>
-              <th>Progreso</th>
-              <SmartsheetData sheetId={sheetId} />
-            </tr>
-          </thead>
-          <tbody>
-            {proyectos.map((proyecto) => (
-              <tr key={proyecto._id}>
-                <td>{proyecto.NombreProyecto}</td>
-                <td>{proyecto.Talentos.map((t) => t.nombre).join(', ')}</td>
-                <td>{proyecto.Presupuesto ? `$${proyecto.Presupuesto}` : ''}</td>
-                <td>{proyecto.Estatus}</td>
-                <td>{proyecto.Pago ? 'Pagado' : 'Pendiente'}</td>
-                <td>
-                  <div className="progressContainer">
-                    <div
-                      className="progressBar"
-                      style={{ width: `${proyecto.Completion || 0}%` }}
-                    ></div>
-                  </div>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
-
-      {/* Gráfica */}
-      <div>
-        <h2>Reporte de Ganancias</h2>
-        <Line data={chartData} />
-      </div>
-
-      {/* Notas por Talento */}
-      <div className="talentosNotas">
-        <div className="talentosList">
-          <h3>Talentos Registrados</h3>
-          <ul>
-            {talentos.map(talento => (
-              <li key={talento._id}>
-                {talento.Nombre} {talento.ApelPaterno}
-                <button onClick={() => handleSelectTalent(talento)}>
-                  <ion-icon name="reader-outline"></ion-icon> Nota
-                </button>
-              </li>
-            ))}
-          </ul>
+        {/* Cards */}
+        <div className="cardBox">
+          <div className="card">
+            <div>
+              <div className="numbers">{visitas}</div>
+              <div className="cardName">Visitas</div>
+            </div>
+            <div className="iconBx">
+              <ion-icon name="eye-outline"></ion-icon>
+            </div>
+          </div>
+          <div className="card">
+            <div>
+              <div className="numbers">{formatNumber(ingresos)}</div>
+              <div className="cardName">Ingresos</div>
+            </div>
+            <div className="iconBx">
+              <ion-icon name="log-in-outline"></ion-icon>
+            </div>
+          </div>
+          <div className="card">
+            <div>
+              <div className="numbers">{formatNumber(egresos)}</div>
+              <div className="cardName">Egresos</div>
+            </div>
+            <div className="iconBx">
+              <ion-icon name="log-out-outline"></ion-icon>
+            </div>
+          </div>
+          <div className="card">
+            <div>
+              <div className="numbers">{formatNumber(ganancias)}</div>
+              <div className="cardName">Ganancias</div>
+            </div>
+            <div className="iconBx">
+              <ion-icon name="cash-outline"></ion-icon>
+            </div>
+          </div>
         </div>
-        <div className="tableContainer">
-          <h2>Notas para {selectedTalent ? selectedTalent.Nombre : 'Selecciona un talento'}</h2>
-          <textarea
-            placeholder="Escribe tus notas aquí..."
-            value={talentNotes}
-            onChange={handleNotesChange}
-            style={{ width: '100%', minHeight: '100px', margin: '10px 0', padding: '10px' }}
-          ></textarea>
-          <button className="noteButton" onClick={handleSaveNotes}>
-            Guardar Nota
-          </button>
+    
+{/* Tabla de Proyectos */}
+<div className="dashboard">
+  <h2>Proyectos</h2>
+  <table className="projectsTable">
+    <thead>
+      <tr>
+        <th>Nombre del Proyecto</th>
+        <th>Talentos</th>
+        <th>Presupuesto</th>
+        <th>Estado</th>
+        <th>Pago</th>
+        <th>Progreso</th>
+        <SmartsheetData workspaceId={workspaceId} />
+      </tr>
+    </thead>
+    <tbody>
+      {proyectos.map((proyecto) => (
+        <tr key={proyecto._id}>
+          <td>{proyecto.NombreProyecto}</td>
+          <td>
+            <div className="talentosImagesContainer">
+              {proyecto.Talentos.map((talentoId) => {
+                const talento = talentos.find((t) => t._id === talentoId);
+                return talento ? (
+                  <img
+                    key={talento._id}
+                    src={talento.Fotografia || 'ruta/default/avatar.png'}
+                    alt={talento.Nombre}
+                    title={`${talento.Nombre} ${talento.ApelPaterno}`}
+                    className="talentosImage"
+                  />
+                ) : null;
+              })}
+            </div>
+          </td>
+          <td>{proyecto.Presupuesto ? `$${proyecto.Presupuesto}` : ''}</td>
+          <td>{proyecto.Estatus}</td>
+          <td>{proyecto.Pago ? 'Pagado' : 'Pendiente'}</td>
+          <td>
+            <div className="progressContainer">
+              <div
+                className="progressBar"
+                style={{ width: `${proyecto.Completion || 0}%` }}
+              ></div>
+            </div>
+          </td>
+        </tr>
+      ))}
+    </tbody>
+  </table>
+</div>
+    
+        {/* Gráfica */}
+        <div className="chartContainer">
+          <h2>Reporte de Ganancias</h2>
+          <Line data={chartData} />
         </div>
       </div>
-    </div>
-  );
+    );    
 };
 
 export default Dashboard;

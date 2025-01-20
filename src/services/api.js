@@ -145,5 +145,85 @@ export const saveTalentNotes = async (talentId, content) => {
   }
 };
 
+export const eliminarNota = async (id) => {
+  await fetch(`${API_URL}/notes/${id}`, {
+    method: 'DELETE'
+  });
+};
 
+// Agregar un indicador a un talento
+export const agregarIndicador = async (talentId, indicadorData) => {
+  const response = await fetch(`${API_URL}/talentos/${talentId}/indicadores`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify(indicadorData)
+  });
+  if (!response.ok) {
+    throw new Error('Error al agregar indicador');
+  }
+  return await response.json();
+};
 
+// Obtener indicadores de un talento
+export const obtenerIndicadores = async (talentId) => {
+  const response = await fetch(`${API_URL}/talentos/${talentId}/indicadores`);
+  if (!response.ok) {
+    throw new Error('Error al obtener indicadores');
+  }
+  return await response.json();
+};
+
+// Obtener la evaluación de un talento
+export const obtenerEvaluacion = async (talentId) => {
+  const response = await fetch(`${API_URL}/talentos/${talentId}/evaluacion`);
+  if (!response.ok) {
+    throw new Error('Error al obtener evaluación');
+  }
+  return await response.json();
+};
+
+// Función para actualizar un indicador de un talento
+export const actualizarIndicador = async (talentId, indicatorId, value) => {
+  const response = await fetch(`${API_URL}/talentos/${talentId}/indicadores/${indicatorId}`, {
+    method: 'PUT',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({ valor: value }),
+  });
+
+  if (!response.ok) {
+    throw new Error('Error al actualizar el indicador');
+  }
+  return response.json();
+};
+
+// Función para generar el reporte XML
+//export const generarReporteXML = async () => {
+//  try {
+//    const response = await fetch(`${API_URL}/xml`, {
+//      method: 'GET',
+//      headers: {
+//        'Content-Type': 'application/xml',
+//      },
+//    });
+
+//    if (!response.ok) {
+//      throw new Error('Error al generar el reporte XML');
+//    }
+
+    // Convertir la respuesta en un blob para descargar el archivo
+//    const blob = await response.blob();
+//    const url = window.URL.createObjectURL(blob);
+//    const link = document.createElement('a');
+//    link.href = url;
+//    link.setAttribute('download', 'reporte-ganancias.xml');
+//    document.body.appendChild(link);
+//    link.click();
+//    link.remove();
+//  } catch (error) {
+//    console.error('Error al generar el reporte XML:', error.message);
+//  }
+//};
