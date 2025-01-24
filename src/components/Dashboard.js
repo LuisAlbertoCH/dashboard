@@ -8,11 +8,11 @@ import {
 //import { generarReporteXML } from '../services/api';
 import SmartsheetData from '../components/SmartsheetData';
 import { Line } from 'react-chartjs-2';
-import { Chart, registerables } from 'chart.js'; // Importar Chart.js y registrar componentes
+import { Chart, registerables } from 'chart.js';
 import './Dashboard.css';
 import Topbar from './Topbar';
 
-Chart.register(...registerables); // Registro necesario para Chart.js
+Chart.register(...registerables);
 
 const Dashboard = ({ onToggleTheme }) => {
   const [proyectos, setProyectos] = useState([]);
@@ -22,11 +22,11 @@ const Dashboard = ({ onToggleTheme }) => {
   const [egresos, setEgresos] = useState(0);
   const [ganancias, setGanancias] = useState(0);
   const [chartData, setChartData] = useState({ labels: [], datasets: [] });
-  const [error, setError] = useState(null); // Estado para manejar errores
+  const [error, setError] = useState(null);
   const sheetId = 'XhHJQ9MpjfwFvg4g3whjx78GvQpCvccV6p23Ph81';
   const workspaceId = '5911013938751364'
-  const [modalOpen, setModalOpen] = useState(false); // Estado del modal
-  const [modalUrl, setModalUrl] = useState(''); // URL para el iframe del modal
+  const [modalOpen, setModalOpen] = useState(false);
+  const [modalUrl, setModalUrl] = useState('');
 
   useEffect(() => {
     const cargarDatos = async () => {
@@ -73,8 +73,8 @@ const Dashboard = ({ onToggleTheme }) => {
       egresosTotal += parseFloat(talento.Salario) || 0;
     });
 
-    const impuestos = egresosTotal * 0.16; // Calcula impuestos sobre los egresos
-    egresosTotal += impuestos; // Sumar impuestos a los egresos totales
+    const impuestos = egresosTotal * 0.16;
+    egresosTotal += impuestos;
     const gananciasNetas = ingresosTotal - egresosTotal;
 
     setIngresos(ingresosTotal);
@@ -94,29 +94,29 @@ const Dashboard = ({ onToggleTheme }) => {
   
     proyectos.forEach((proyecto) => {
       if (proyecto.Ingreso) {
-        const fecha = new Date(proyecto.FechaInicio); // Fecha de inicio del proyecto
+        const fecha = new Date(proyecto.FechaInicio);
         const mes = fecha.getMonth();
-        ingresosPorMes[mes] += parseFloat(proyecto.Ingreso) || 0; // Sumar ingreso del proyecto
+        ingresosPorMes[mes] += parseFloat(proyecto.Ingreso) || 0;
       }
     });
   
     talentos.forEach((talento) => {
       const salarioMensual = parseFloat(talento.Salario) || 0;
       for (let i = 0; i < 12; i++) {
-        gastosPorMes[i] += salarioMensual; // Sumar salarios a los gastos por mes
+        gastosPorMes[i] += salarioMensual;
       }
     });
   
     proyectos.forEach((proyecto) => {
       if (proyecto.Pago) {
-        const fecha = new Date(proyecto.FechaFin); // Fecha de fin para sumar pagos
+        const fecha = new Date(proyecto.FechaFin);
         const mes = fecha.getMonth();
-        gastosPorMes[mes] += parseFloat(proyecto.Presupuesto) || 0; // Sumar pagos a los gastos
+        gastosPorMes[mes] += parseFloat(proyecto.Presupuesto) || 0;
       }
     });
   
     setChartData({
-      labels: meses, // Etiquetas del eje X
+      labels: meses, // eje X
       datasets: [
         {
           label: 'Proyección de Ingresos ($)',
